@@ -1,0 +1,6 @@
+code {
+    display: inline-block;
+    width: 20%; /* Whatever. The <code>'s width will change */
+    float: none;
+    font-size: large;
+}
