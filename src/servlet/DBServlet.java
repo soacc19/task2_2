@@ -44,7 +44,8 @@ public class DBServlet extends HttpServlet {
 		//doGet(request, response);
 		
 		DBClient dbClient = new DBClient();
-		String type = request.getParameter("type").toString();		
+		String type = request.getParameter("type").toString();
+		String access_token, path;
 		
 		PrintWriter out = response.getWriter();
 		//System.out.println("DEBUG: doPost type=" + type);
@@ -61,14 +62,14 @@ public class DBServlet extends HttpServlet {
 				out.write(dbClient.accessToken(code));
 				break;
 			case "getAccInfo":
-				String access_token = request.getParameter("access_token").toString();
+			    access_token = request.getParameter("access_token").toString();
 				String account_id = request.getParameter("account_id").toString();
 				//System.out.println("DEBUG: access_token=" + access_token + " account_id=" + account_id);
 				out.write(dbClient.getAccountInfo(access_token, account_id));
 				break;
 			case "uploadFile":
 				access_token = request.getParameter("access_token").toString();
-				String path = request.getParameter("path").toString();
+				path = request.getParameter("path").toString();
 				//System.out.println("DEBUG: access_token=" + access_token + " path=" + path);
 				
 				if (path.equals(""))
@@ -76,8 +77,16 @@ public class DBServlet extends HttpServlet {
 					out.write("error: Please, provide a path of file to be uploaded!");
 					break;
 				}
-				System.out.println("DEBUG: fuck");
 				out.write(dbClient.uploadFile(access_token, path));
+				break;
+			case "showAppFolder":
+				access_token = request.getParameter("access_token").toString();
+				path = request.getParameter("path").toString();
+				String include_non_downloadable_files = request.getParameter("include_non_downloadable_files").toString();
+				System.out.println("DEBUG: access_token=" + access_token + " path=" + path + " include_non_downloadable_files= "
+						+ include_non_downloadable_files);
+		
+				out.write(dbClient.showAppFolder(access_token, path, include_non_downloadable_files));
 				break;
 			default:
 				break;

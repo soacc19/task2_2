@@ -126,6 +126,7 @@ public class DBClient {
 		return response.toString();
 	}
 	
+	//------------------------------------------------------------------------------------------------
 	public String uploadFile(String token, String path) throws URISyntaxException, IOException {
 		String access_token = "" + token;
 		String sourcePath = "" + path; 		// required file path on local file system
@@ -163,7 +164,54 @@ public class DBClient {
 		}
 		catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
+			
+			response.append("error: Unexpected error! Please, check parameters!");
+		}
+		finally {
+			connection.disconnect();
+		}
+	
+		return response.toString();
+	}
+	
+	//------------------------------------------------------------------------------------------------
+	public String showAppFolder(String token, String path, String include_non_downloadable_files) throws URISyntaxException, IOException {
+		String access_token = "" + token;
+		
+		// 
+		String content = "{\"path\": \"" + path + "\","
+				         + "\"recursive\": true, \"include_non_downloadable_files\": " + include_non_downloadable_files + "}";
+		
+		URL url = new URL("https://api.dropboxapi.com/2/files/list_folder");
+		HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+		StringBuffer response = new StringBuffer();
+		
+		try {
+			connection.setDoOutput(true);
+			connection.setRequestMethod("POST");
+			connection.setRequestProperty("Authorization", "Bearer "+access_token);
+			connection.setRequestProperty("Content-Type", "application/json");
+			connection.setRequestProperty("Content-Length", "" + content.length());
+			
+			OutputStreamWriter outputStreamWriter = new OutputStreamWriter(connection.getOutputStream());
+			outputStreamWriter.write(content);
+			outputStreamWriter.flush();
+			
+			BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			String inputLine;
+			
+			while ((inputLine = in.readLine()) != null) { 
+				response.append(inputLine);
+			}
+			
+			in.close();			
+		}
+		catch (IOException e) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
+			
+			response.append("error: Unexpected error! Please, check parameters!");
 		}
 		finally {
 			connection.disconnect();
