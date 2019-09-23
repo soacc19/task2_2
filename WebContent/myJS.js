@@ -1,14 +1,15 @@
 window.onload = customize;
 
-function customize() {
-	window.document.getElementById('div3').style.display = 'none';
+function customize(clearMsg) {
+	if (clearMsg == '1') {
+		window.document.getElementById('div3').style.display = 'none';
+	}
 	
 	// initial customize
 	if (sessionStorage.getItem("state") === null)
 		sessionStorage.setItem("state", "access");
 	
 	disableButtonsExcept(sessionStorage.getItem("state"));
-	//showAppFolder("{\"entries\":[{\".tag\":\"file\",\"name\":\"Prime_Numbers.txt\",\"id\":\"id:a4ayc_80_OEAAAAAAAAAXw\",\"client_modified\":\"2015-05-12T15:50:38Z\",\"server_modified\":\"2015-05-12T15:50:38Z\",\"rev\":\"a1c10ce0dd78\",\"size\":7212,\"path_lower\":\"\/homework\/math\/prime_numbers.txt\",\"path_display\":\"\/Homework\/math\/Prime_Numbers.txt\",\"sharing_info\":{\"read_only\":true,\"parent_shared_folder_id\":\"84528192421\",\"modified_by\":\"dbid:AAH4f99T0taONIb-OurWxbNQ6ywGRopQngc\"},\"is_downloadable\":true,\"property_groups\":[{\"template_id\":\"ptid:1a5n2i6d3OYEAAAAAAAAAYa\",\"fields\":[{\"name\":\"SecurityPolicy\",\"value\":\"Confidential\"}]}],\"has_explicit_shared_members\":false,\"content_hash\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"},{\".tag\":\"folder\",\"name\":\"math\",\"id\":\"id:a4ayc_80_OEAAAAAAAAAXz\",\"path_lower\":\"\/homework\/math\",\"path_display\":\"\/Homework\/math\",\"sharing_info\":{\"read_only\":false,\"parent_shared_folder_id\":\"84528192421\",\"traverse_only\":false,\"no_access\":false},\"property_groups\":[{\"template_id\":\"ptid:1a5n2i6d3OYEAAAAAAAAAYa\",\"fields\":[{\"name\":\"SecurityPolicy\",\"value\":\"Confidential\"}]}]}],\"cursor\":\"ZtkX9_EHj3x7PMkVuFIhwKYXEpwpLwyxp9vMKomUhllil9q7eWiAu\",\"has_more\":false}");
 }
 
 function doQuery(inputType)
@@ -36,8 +37,14 @@ function doQuery(inputType)
     }
     else if (inputType === "uploadFile") {    	
     	q_str = 'type=uploadFile&access_token=' + sessionStorage.getItem("access_token")
-    			+ '&path=' + window.document.getElementById('t4').value;   	
+    			+ '&sourcePath=' + window.document.getElementById('t4').value
+    			+ '&remotePath=' + window.document.getElementById('t7').value;   	
     	callback = 'doQueryUploadFile_back';
+    }
+    else if (inputType === "deleteFile") {    	
+    	q_str = 'type=deleteFile&access_token=' + sessionStorage.getItem("access_token")
+    			+ '&remotePath=' + window.document.getElementById('t5').value;   	
+    	callback = 'doQueryDeleteFile_back';
     }
     else if (inputType === "showAppFolder") {
     	var checkBox = window.document.getElementById("cb1");
@@ -47,7 +54,7 @@ function doQuery(inputType)
     	}
     	
     	q_str = 'type=showAppFolder&access_token=' + sessionStorage.getItem("access_token")
-    			+ '&path=' + window.document.getElementById('t5').value + "&include_non_downloadable_files=" + include_non_downloadable_files;   	
+    			+ '&remotePath=' + window.document.getElementById('t6').value + "&include_non_downloadable_files=" + include_non_downloadable_files;   	
     	callback = 'doQueryShowAppFolder_back';
     }
     else {
@@ -66,60 +73,83 @@ function doQueryAccess_back(result)
 
 function doQueryToken_back(result)
 {
-	var tokenJSON = JSON.parse(result);
-	sessionStorage.setItem("access_token", tokenJSON.access_token);
-	sessionStorage.setItem("account_id", tokenJSON.account_id);
-	
-	sessionStorage.setItem("state", "getAccInfo");
-	customize();
+	if (result.substring(0,5)=='Error') {
+		 window.document.getElementById('div3').style.display = 'block';
+		 window.document.getElementById('div3').innerHTML="<p style='color:red;'><b>"+result+"</b></p>";
+	}
+	else {
+		var tokenJSON = JSON.parse(result);
+		sessionStorage.setItem("access_token", tokenJSON.access_token);
+		sessionStorage.setItem("account_id", tokenJSON.account_id);
+		
+		sessionStorage.setItem("state", "ready");
+		customize('1');
+	}	
 }
 
 function doQueryGetAccInfo_back(result)
 {	
-	var tokenJSON = JSON.parse(result);
-	sessionStorage.setItem("given_name", tokenJSON.name.given_name);
-	sessionStorage.setItem("surname", tokenJSON.name.surname);
-	sessionStorage.setItem("email", tokenJSON.email);
-	sessionStorage.setItem("profile_photo_url", tokenJSON.profile_photo_url);
-	
-	window.document.getElementById('td1').innerHTML = sessionStorage.getItem("given_name");
-	window.document.getElementById('td2').innerHTML = sessionStorage.getItem("surname");
-	window.document.getElementById('td3').innerHTML = sessionStorage.getItem("email");
-	window.document.getElementById('img1').src = sessionStorage.getItem("profile_photo_url");
-	
-	sessionStorage.setItem("state", "uploadFile");
-	customize();
+	if (result.substring(0,5)=='Error') {
+		 window.document.getElementById('div3').style.display = 'block';
+		 window.document.getElementById('div3').innerHTML="<p style='color:red;'><b>"+result+"</b></p>";
+	}
+	else {
+		var tokenJSON = JSON.parse(result);
+		sessionStorage.setItem("given_name", tokenJSON.name.given_name);
+		sessionStorage.setItem("surname", tokenJSON.name.surname);
+		sessionStorage.setItem("email", tokenJSON.email);
+		sessionStorage.setItem("profile_photo_url", tokenJSON.profile_photo_url);
+		
+		window.document.getElementById('td1').innerHTML = sessionStorage.getItem("given_name");
+		window.document.getElementById('td2').innerHTML = sessionStorage.getItem("surname");
+		window.document.getElementById('td3').innerHTML = sessionStorage.getItem("email");
+		window.document.getElementById('img1').src = sessionStorage.getItem("profile_photo_url");
+		
+		customize('1');
+	}	
 }
 
 function doQueryUploadFile_back(result)
 {	
-	if (result.substring(0,5)=='error') {
+	if (result.substring(0,5)=='Error') {
 		 window.document.getElementById('div3').style.display = 'block';
-		 window.document.getElementById('div3').innerHTML="<p style='color:red;'><b>"+result.substring(6)+"</b></p>";
+		 window.document.getElementById('div3').innerHTML="<p style='color:red;'><b>"+result+"</b></p>";
 	}
 	else {
-		//TODO confirmation OK message about upload success
 		var tokenJSON = JSON.parse(result);
 		
-		//TODO extraFeature
-		//sessionStorage.setItem("state", "extraFeature");
-		customize();
+		window.document.getElementById('div3').style.display = 'block';
+		window.document.getElementById('div3').innerHTML="<p style='color:green;'><b>Successfully uploaded file "+tokenJSON.name+" of size "+tokenJSON.size+" bytes to "
+														 + tokenJSON.path_display + "</b></p>";
+		customize('0');
+	}	
+}
+
+function doQueryDeleteFile_back(result)
+{	
+	if (result.substring(0,5)=='Error') {
+		 window.document.getElementById('div3').style.display = 'block';
+		 window.document.getElementById('div3').innerHTML="<p style='color:red;'><b>"+result+"</b></p>";
+	}
+	else {
+		var tokenJSON = JSON.parse(result);
+		
+		window.document.getElementById('div3').style.display = 'block';
+		window.document.getElementById('div3').innerHTML="<p style='color:green;'><b>Successfully deleted file "+tokenJSON.metadata.name+" of size "+tokenJSON.metadata.size+" bytes</b></p>";
+		customize('0');
 	}	
 }
 
 function doQueryShowAppFolder_back(result)
 {	
-	if (result.substring(0,5)=='error') {
+	if (result.substring(0,5)=='Error') {
 		 window.document.getElementById('div3').style.display = 'block';
-		 window.document.getElementById('div3').innerHTML="<p style='color:red;'><b>"+result.substring(6)+"</b></p>";
+		 window.document.getElementById('div3').innerHTML="<p style='color:red;'><b>"+result+"</b></p>";
 	}
 	else {
-		//TODO confirmation OK message about upload success
 		showAppFolder(result);
 		
-		//TODO extraFeature
-		//sessionStorage.setItem("state", "extraFeature");
-		customize();
+		customize('1');
 	}	
 }
 
@@ -135,6 +165,7 @@ function disableButtonsExcept(state) {
 	document.getElementById('b3').disabled = true;
 	document.getElementById('b4').disabled = true;
 	document.getElementById('b5').disabled = true;
+	document.getElementById('b6').disabled = true;
 	
 	var buttonIDs = [];
 	
@@ -145,23 +176,20 @@ function disableButtonsExcept(state) {
 	case "token":
 		buttonIDs.push('b2');
 		break;
-	case "getAccInfo":
+	case "ready":
 		buttonIDs.push('b3');
-		break;
-	case "uploadFile":
 		buttonIDs.push('b4');
 		buttonIDs.push('b5');
+		buttonIDs.push('b6');
+		buttonIDs.push('download_button');
 		break;
 	default:
-		//buttonID = 'b4';
 		break;
 	}
 	
 	for (var i = 0; i < buttonIDs.length; i++) {
 		document.getElementById(buttonIDs[i]).disabled = false;
-	}
-	
-	
+	}	
 }	
 
 function showAppFolder(jsonInput) {
@@ -230,5 +258,5 @@ function showAppFolder(jsonInput) {
 	}
 	treeViewHtml += "</p>";
 	
-	window.document.getElementById('div9').innerHTML = treeViewHtml;
+	window.document.getElementById('div11').innerHTML = treeViewHtml;
 }

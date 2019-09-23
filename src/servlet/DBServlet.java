@@ -45,49 +45,57 @@ public class DBServlet extends HttpServlet {
 		
 		DBClient dbClient = new DBClient();
 		String type = request.getParameter("type").toString();
-		String access_token, path;
+		String access_token, sourcePath, remotePath;
 		
 		PrintWriter out = response.getWriter();
-		//System.out.println("DEBUG: doPost type=" + type);
 		
 		try {
 			switch (type) {
 			case "access": 
-				//System.out.println("DEBUG: access");
 				out.write(dbClient.sendRequest());
 				break;
 			case "token":
 				String code = request.getParameter("code").toString();
-				//System.out.println("DEBUG: code=" + code);
 				out.write(dbClient.accessToken(code));
 				break;
 			case "getAccInfo":
 			    access_token = request.getParameter("access_token").toString();
 				String account_id = request.getParameter("account_id").toString();
-				//System.out.println("DEBUG: access_token=" + access_token + " account_id=" + account_id);
 				out.write(dbClient.getAccountInfo(access_token, account_id));
 				break;
 			case "uploadFile":
 				access_token = request.getParameter("access_token").toString();
-				path = request.getParameter("path").toString();
+				sourcePath = request.getParameter("sourcePath").toString();
+				remotePath =  request.getParameter("remotePath").toString();
 				//System.out.println("DEBUG: access_token=" + access_token + " path=" + path);
 				
-				if (path.equals(""))
+				if (sourcePath.equals(""))
 				{
-					out.write("error: Please, provide a path of file to be uploaded!");
+					out.write("Error: Please, provide a path of file to be uploaded!");
 					break;
 				}
-				out.write(dbClient.uploadFile(access_token, path));
+				out.write(dbClient.uploadFile(access_token, sourcePath, remotePath));
+				break;			
+			case "deleteFile":
+				access_token = request.getParameter("access_token").toString();
+				remotePath = request.getParameter("remotePath").toString();
+				
+				if (remotePath.equals(""))
+				{
+					out.write("Error: Please, provide a path of file to be deleted!");
+					break;
+				}
+		
+				out.write(dbClient.deleteFile(access_token, remotePath));
 				break;
 			case "showAppFolder":
 				access_token = request.getParameter("access_token").toString();
-				path = request.getParameter("path").toString();
+				remotePath = request.getParameter("remotePath").toString();
 				String include_non_downloadable_files = request.getParameter("include_non_downloadable_files").toString();
-				System.out.println("DEBUG: access_token=" + access_token + " path=" + path + " include_non_downloadable_files= "
-						+ include_non_downloadable_files);
 		
-				out.write(dbClient.showAppFolder(access_token, path, include_non_downloadable_files));
+				out.write(dbClient.showAppFolder(access_token, remotePath, include_non_downloadable_files));
 				break;
+
 			default:
 				break;
 			}
@@ -95,6 +103,7 @@ public class DBServlet extends HttpServlet {
 		} catch (URISyntaxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			out.write("Error: URI syntax error!");
 		}
 		
 		out.flush();

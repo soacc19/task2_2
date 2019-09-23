@@ -47,22 +47,45 @@
 </div>
 <div id="div5">
 	<code>Path of file to be uploaded:</code>
-	<input type="text" id="t4" value="" style="width:30%">
+	<input type="text" id="t4" value="" placeholder="local machine filesystem path" style="width:30%">
+
+</div>
+<div id="div12">
+	<code>Path of folder where to upload:</code>
+	<input type="text" id="t7" value="" placeholder="dropbox app filesystem path (default is root)" style="width:30%">
 </div>
 <div id="div6">
 	<input type="button" id="b4" value="Upload file"  onclick="doQuery('uploadFile');" style="width:15%; color:black" disabled>
 </div>
+<div id="dl1">
+    <code>Path of file to be downloaded:</code>
+    <input type="text" id="download_source" value="" placeholder="dropbox app filesystem path" style="width:30%">
+</div>
+<div id="dl2">
+    <code>Path of folder where to download:</code>
+    <input type="text" id="download_destination" value="" placeholder="local machine filesystem path" style="width:30%">
+</div>
+<div id="dl3">
+    <input type="button" id="download_button" value="Download file"  onclick="doQuery('downloadFile');" style="width:15%; color:black" disabled>
+</div>
 <div id="div7">
-	<code>Path of folder to be listed:</code>
-	<input type="text" id="t5" value="" placeholder="leave empty for root application folder" style="width:30%">
+	<code>Path of file to be deleted:</code>
+	<input type="text" id="t5" value="" placeholder="dropbox app filesystem path" style="width:30%">
 </div>
 <div id="div8">
+	<input type="button" id="b6" value="Delete file"  onclick="doQuery('deleteFile');" style="width:15%; color:black" disabled>
+</div>
+<div id="div9">
+	<code>Path of folder to be listed:</code>
+	<input type="text" id="t6" value="" placeholder="dropbox app filesystem path (default is root)" style="width:30%">
+</div>
+<div id="div10">
 	<input type="button" id="b5" value="Show app folder"  onclick="doQuery('showAppFolder');" style="width:15%; color:black" disabled>
 	<input type="checkbox" id="cb1" value="downloadable"> Show only downloadable files<br>
 </div>
 <div id="div3">
 </div>
-<div id="div9">
+<div id="div11">
 </div>
 
 </body>
