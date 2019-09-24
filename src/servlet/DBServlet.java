@@ -75,7 +75,19 @@ public class DBServlet extends HttpServlet {
 					break;
 				}
 				out.write(dbClient.uploadFile(access_token, sourcePath, remotePath));
-				break;			
+				break;
+			case "downloadFile":
+				access_token = request.getParameter("access_token").toString();
+				sourcePath = request.getParameter("sourcePath").toString();
+				remotePath =  request.getParameter("remotePath").toString();
+				
+				if (sourcePath.equals("") || remotePath.equals(""))
+				{
+					out.write("Error: Please, provide a path of file to be downloaded!");
+					break;
+				}
+				out.write(dbClient.downloadFile(access_token, sourcePath, remotePath));
+				break;
 			case "deleteFile":
 				access_token = request.getParameter("access_token").toString();
 				remotePath = request.getParameter("remotePath").toString();

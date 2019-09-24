@@ -41,6 +41,12 @@ function doQuery(inputType)
     			+ '&remotePath=' + window.document.getElementById('t7').value;   	
     	callback = 'doQueryUploadFile_back';
     }
+    else if (inputType === "downloadFile") {
+    	q_str = "type=downloadFile&access_token=" + sessionStorage.getItem("access_token")
+    			+ '&sourcePath=' + window.document.getElementById('download_source').value
+    			+ '&remotePath=' + window.document.getElementById('download_destination').value;
+    	callback = 'doQueryDownloadFile_back';
+    }
     else if (inputType === "deleteFile") {    	
     	q_str = 'type=deleteFile&access_token=' + sessionStorage.getItem("access_token")
     			+ '&remotePath=' + window.document.getElementById('t5').value;   	
@@ -125,11 +131,27 @@ function doQueryUploadFile_back(result)
 	}	
 }
 
-function doQueryDeleteFile_back(result)
+function doQueryDownloadFile_back(result)
 {	
 	if (result.substring(0,5)=='Error') {
 		 window.document.getElementById('div3').style.display = 'block';
 		 window.document.getElementById('div3').innerHTML="<p style='color:red;'><b>"+result+"</b></p>";
+	}
+	else {
+		// Download API calls don't return proper JSON - just raw file data.
+		var tokenJSON = JSON.parse(result);
+		
+		window.document.getElementById('div3').style.display = 'block';
+		window.document.getElementById('div3').innerHTML="<p style='color:green;'><b>Successfully downloaded file.</b></p>";
+		customize('0');
+	}	
+}
+
+function doQueryDeleteFile_back(result)
+{	
+	if (result.substring(0,5)=='Error') {
+		window.document.getElementById('div3').style.display = 'block';
+		window.document.getElementById('div3').innerHTML="<p style='color:red;'><b>"+result+"</b></p>";
 	}
 	else {
 		var tokenJSON = JSON.parse(result);

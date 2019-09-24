@@ -2,6 +2,7 @@ package dropbox;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -15,7 +16,7 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import com.sun.org.apache.xerces.internal.util.URI;
+import java.net.URI;
 
 public class DBClient {
 	private static final String APP_KEY = "4v49nli2mnbtdkd"; // get from AppConsole when create the DropBox App
@@ -212,6 +213,46 @@ public class DBClient {
 		}
 	
 		return response.toString();
+	}
+	
+	//------------------------------------------------------------------------------------------------
+	public String downloadFile(String token, String sourcePath, String remotePath) throws URISyntaxException, IOException {
+		String access_token = "" + token;
+		String content = "{\"path\": \"" + sourcePath + "\"}";
+		
+		URL url = new URL("https://content.dropboxapi.com/2/files/download");
+		HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+		
+		try {
+			connection.setDoOutput(true);
+			connection.setRequestMethod("POST");
+			connection.setRequestProperty("Authorization", "Bearer " + access_token);
+			connection.setRequestProperty("Dropbox-API-Arg", "" + content);
+			connection.setRequestProperty("Content-Type", "");
+			
+			OutputStreamWriter outputStreamWriter = new OutputStreamWriter(connection.getOutputStream());
+			outputStreamWriter.write("");
+			outputStreamWriter.flush();
+				
+			// Save to local file.
+			FileOutputStream fos = new FileOutputStream(remotePath);		
+		    byte[] buffer = new byte[1024];
+		    int bytesRead;
+		    while ((bytesRead = connection.getInputStream().read(buffer)) != -1)
+		    {
+		        fos.write(buffer, 0, bytesRead);
+		    }
+		}
+		catch (IOException e) {
+			//e.printStackTrace();
+			return "Error: " + e.getMessage();
+		}
+		finally {
+			connection.disconnect();
+		}
+		
+		return "{\"access_token\":\"" + token + "\","
+		         + "\"path\":\"" + remotePath + "\"}";
 	}
 	
 	//------------------------------------------------------------------------------------------------
